@@ -1,5 +1,6 @@
 const Sauce = require('../models/saucesModels.js');
 const fs = require("fs");
+const { log } = require('console');
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce); // on extrait l'objet JSON de sauce
@@ -15,7 +16,6 @@ exports.createSauce = (req, res, next) => {
 
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then((sauce) => { // on veut que l'id de l'objet en vente soit le même que l'id en paramètre de la requête (en gros)
-    console.log("sauce");  
     res.status(200).json(sauce);
     })
   .catch((error) => {
@@ -61,3 +61,17 @@ exports.getAllSauces = (req, res, next) => {
     }
   );
 };
+
+
+exports.getReview = (req, res, next) => {
+  Sauce.findOne({_id: req.params.id}).then((sauce) => { 
+    res.status(200).json(sauce);
+    if (req.body.like === 1) {
+      sauce.usersLiked.push(req.body.like)
+      console.log(sauce.usersLiked);
+    } else if (req.body.like === -1){
+      sauce.usersDisliked.push(req.body.like)
+      console.log(sauce.usersDisliked)
+    }
+  })
+}

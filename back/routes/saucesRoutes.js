@@ -10,5 +10,6 @@ router.get('/', auth, saucesCtrl.getAllSauces);
 router.get('/:id', auth, saucesCtrl.getOneSauce);  // le : dit à express que cette partie de la route est dynamique
 router.put('/:id', auth, multer, saucesCtrl.modifySauce);  // le : dit à express que cette partie de la route est dynamique
 router.delete('/:id', auth, saucesCtrl.deleteSauce);  // le : dit à express que cette partie de la route est dynamique
+router.post("/:id/like", auth, saucesCtrl.getReview);
 
 module.exports = router;
