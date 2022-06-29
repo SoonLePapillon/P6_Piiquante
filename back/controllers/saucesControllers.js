@@ -37,17 +37,23 @@ exports.modifySauce = (req, res, next) => {
     .catch(error => res.status(400).json({ error }));
 };
 
-exports.deleteSauce = (req, res, next) => {
+exports.deleteSauce = (req, res, next) => {;
   Sauce.findOne({ _id: req.params.id })
-    .then(sauce => {
-      const filename = sauce.imageUrl.split('/images/')[1];
-      fs.unlink(`images/${filename}`, () => { // unlink vient du package fs et c'est pour delete un fichier
-        Sauce.deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
-          .catch(error => res.status(400).json({ error }));
-      });
-    })
-    .catch(error => res.status(500).json({ error }));
+  .then(sauce => {
+    if(req.auth.userId !== sauce.userId) {
+      return res.status(401).json({message: 'vous ne pouvez pas modifier cette sauce'})
+    }
+    const filename = sauce.imageUrl.split('/images/')[1];
+    fs.unlink(`images/${filename}`, () => {
+      Sauce.deleteOne({ _id: req.params.id })
+        .then(() => res.status(200).json({ message: 'Sauce supprimée !'}))
+        .catch(error => res.status(400).json({ error }));
+    });
+  })
+  .catch(error => {
+    console.log(error);
+    res.status(500).json({message: 'une erreur est survenue'});
+  })
 };
 
 exports.getAllSauces = (req, res, next) => {
@@ -62,45 +68,42 @@ exports.getAllSauces = (req, res, next) => {
   );
 };
 
-
-exports.getReview = (req, res, next) => {
+exports.checkScore = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then((sauce) => { 
-    res.status(200).json(sauce);
     if (req.body.like === 1) {
       if (sauce.usersLiked.includes(req.body.userId)) {
-        res.status(400).json("ERROR")
-      } else {
-        sauce.likes++
-        sauce.usersLiked.push(req.body.userId);
+        res.status(400).json({error})
       }
+      sauce.likes++
+      sauce.usersLiked.push(req.body.userId);
       sauce.save();
       console.log(sauce);
+      res.status(200).json(sauce);
     }
-
+    if (req.body.like === -1) {
+      if (sauce.usersDisliked.includes(req.body.userId)) {
+        res.status(400).json({error});
+      }
+      sauce.dislikes++
+      sauce.usersDisliked.push(req.body.userId);
+      sauce.save();
+      console.log(sauce); 
+      res.status(200).json(sauce);
+    }
     if (req.body.like === 0) {
       if (sauce.usersLiked.includes(req.body.userId)) {
         index = sauce.usersLiked.indexOf(req.body.userId);
-        sauce.usersLiked.splice(index, 1)
-        sauce.likes--
+        sauce.usersLiked.splice(index, 1);
+        sauce.likes--;
       }
       if (sauce.usersDisliked.includes(req.body.userId)) {
         index = sauce.usersDisliked.indexOf(req.body.userId);
-        sauce.usersDisliked.splice(index, 1)
-        sauce.dislikes--
+        sauce.usersDisliked.splice(index, 1);
+        sauce.dislikes--;
       }
       sauce.save();
       console.log(sauce);
-    }
-
-    if (req.body.like === -1) {
-      if (sauce.usersDisliked.includes(req.body.userId)) {
-        res.status(400).json("ERROR");
-      } else {
-        sauce.dislikes++
-        sauce.usersDisliked.push(req.body.userId);
-      }
-      sauce.save();
-      console.log(sauce); 
+      res.status(200).json(sauce);
     }
   })
 }
