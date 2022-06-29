@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersModels.js");
 
-
+// use une clé spécifique pour bcrypt
 exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.password, 10) // 10 tours de hashage pour un mdp secure
       .then(hash => {

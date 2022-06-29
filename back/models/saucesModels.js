@@ -9,7 +9,7 @@ const sauceSchema = mongoose.Schema({ // fonction schema mise à dispostion par 
   imageUrl: { type: String, required: true},
   heat: { type: Number, required: true },
   likes: { type: Number, default: 0 },
-  dislike: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
   usersLiked: { type: [String]},
   usersDisliked: { type: [String]}
 });

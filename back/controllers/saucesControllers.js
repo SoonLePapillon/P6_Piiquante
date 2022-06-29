@@ -1,6 +1,6 @@
 const Sauce = require('../models/saucesModels.js');
+const User = require('../models/usersModels.js');
 const fs = require("fs");
-const { log } = require('console');
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce); // on extrait l'objet JSON de sauce
@@ -67,11 +67,40 @@ exports.getReview = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then((sauce) => { 
     res.status(200).json(sauce);
     if (req.body.like === 1) {
-      sauce.usersLiked.push(req.body.like)
-      console.log(sauce.usersLiked);
-    } else if (req.body.like === -1){
-      sauce.usersDisliked.push(req.body.like)
-      console.log(sauce.usersDisliked)
+      if (sauce.usersLiked.includes(req.body.userId)) {
+        res.status(400).json("ERROR")
+      } else {
+        sauce.likes++
+        sauce.usersLiked.push(req.body.userId);
+      }
+      sauce.save();
+      console.log(sauce);
+    }
+
+    if (req.body.like === 0) {
+      if (sauce.usersLiked.includes(req.body.userId)) {
+        index = sauce.usersLiked.indexOf(req.body.userId);
+        sauce.usersLiked.splice(index, 1)
+        sauce.likes--
+      }
+      if (sauce.usersDisliked.includes(req.body.userId)) {
+        index = sauce.usersDisliked.indexOf(req.body.userId);
+        sauce.usersDisliked.splice(index, 1)
+        sauce.dislikes--
+      }
+      sauce.save();
+      console.log(sauce);
+    }
+
+    if (req.body.like === -1) {
+      if (sauce.usersDisliked.includes(req.body.userId)) {
+        res.status(400).json("ERROR");
+      } else {
+        sauce.dislikes++
+        sauce.usersDisliked.push(req.body.userId);
+      }
+      sauce.save();
+      console.log(sauce); 
     }
   })
 }
