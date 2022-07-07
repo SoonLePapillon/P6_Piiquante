@@ -70,31 +70,33 @@ exports.getAllSauces = (req, res, next) => {
 
 exports.checkScore = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then((sauce) => { 
-    if (req.body.like === 1) {
-      if (sauce.usersLiked.includes(req.body.userId)) {
-        res.status(400).json({error})
+    if (req.body.like === 1) { // Si on appuie sur le pouce vert
+      if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
+        res.status(409).json({error : "Sauce already liked/disliked"}) // rajouter une str pour l'erreur
+      } else {
+        sauce.likes++ // Ajoute 1 au nombre de likes 
+        sauce.usersLiked.push(req.body.userId); // Ajoute l'userId dans le tableau usersLiked
+        sauce.save();
+        console.log(sauce);
+        res.status(200).json(sauce);
       }
-      sauce.likes++
-      sauce.usersLiked.push(req.body.userId);
-      sauce.save();
-      console.log(sauce);
-      res.status(200).json(sauce);
     }
-    if (req.body.like === -1) {
-      if (sauce.usersDisliked.includes(req.body.userId)) {
-        res.status(400).json({error});
+    if (req.body.like === -1) { // Si on appuie sur le pouce rouge
+      if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
+        res.status(409).json({error : "Sauce already liked/disliked"}) // rajouter une str pour l'erreur
+      } else {
+        sauce.dislikes++
+        sauce.usersDisliked.push(req.body.userId);
+        sauce.save();
+        console.log(sauce); 
+        res.status(200).json(sauce);
       }
-      sauce.dislikes++
-      sauce.usersDisliked.push(req.body.userId);
-      sauce.save();
-      console.log(sauce); 
-      res.status(200).json(sauce);
     }
-    if (req.body.like === 0) {
+    if (req.body.like === 0) { // Si on rappuie sur un pouce sur lequel on avait déjà appuyé
       if (sauce.usersLiked.includes(req.body.userId)) {
         index = sauce.usersLiked.indexOf(req.body.userId);
-        sauce.usersLiked.splice(index, 1);
-        sauce.likes--;
+        sauce.usersLiked.splice(index, 1); // On retire l'userId du tableau usersLikes
+        sauce.likes--; // On retire le like
       }
       if (sauce.usersDisliked.includes(req.body.userId)) {
         index = sauce.usersDisliked.indexOf(req.body.userId);

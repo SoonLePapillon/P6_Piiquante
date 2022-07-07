@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express"); // On importe express
 const app = express(); // L'application utilise express
 const bodyParser = require("body-parser");
@@ -8,7 +9,7 @@ const saucesRoutes = require("./routes/saucesRoutes.js");
 const usersRoutes = require("./routes/usersRoutes.js");
 
 mongoose.connect
-  ("mongodb+srv://SoonLePapillon:Birlakhdar75015@sooncluster.padum.mongodb.net/sauces?retryWrites=true&w=majority", 
+  (process.env.DB_ACCESS, 
     { useNewUrlParser: true,
     useUnifiedTopology: true
   })
