@@ -68,35 +68,36 @@ exports.getAllSauces = (req, res, next) => {
   );
 };
 
-// faire idéalement des async await et des switch à la place des IF
-
 exports.checkScore = (req, res, next) => {
   Sauce.findOne({_id: req.params.id})
-  .catch() // meilleur de le mettre en first quand le .then est trop big
+  .catch((error) => {
+    res.status(404).json({
+      error: error
+    })
+  })
   .then((sauce) => { 
-    if (req.body.like === 1) { // Si on appuie sur le pouce vert
-      if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
-        res.status(409).json({error : "Sauce already liked/disliked"}) // rajouter une str pour l'erreur
+    switch (req.body.like) {
+    case 1 : // req.body.like renvoie 1 : pouce vert
+      if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) { // pour empêcher de faire la requête depuis Insomnia
+        res.status(409).json({error : "Sauce already liked/disliked"})
       } else {
         sauce.likes++ // Ajoute 1 au nombre de likes 
         sauce.usersLiked.push(req.body.userId); // Ajoute l'userId dans le tableau usersLiked
         sauce.save();
-        console.log(sauce); // enlever les logs de debug
         res.status(200).json(sauce);
       }
-    }
-    if (req.body.like === -1) { // Si on appuie sur le pouce rouge
+      break;
+    case -1 : // pouce rouge
       if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
-        res.status(409).json({error : "Sauce already liked/disliked"}) // rajouter une str pour l'erreur
+        res.status(409).json({error : "Sauce already liked/disliked"})
       } else {
         sauce.dislikes++
         sauce.usersDisliked.push(req.body.userId);
         sauce.save();
-        console.log(sauce); 
         res.status(200).json(sauce);
       }
-    }
-    if (req.body.like === 0) { // Si on rappuie sur un pouce sur lequel on avait déjà appuyé
+      break;
+    case 0 : // Si on rappuie sur un pouce sur lequel on avait déjà appuyé
       if (sauce.usersLiked.includes(req.body.userId)) {
         index = sauce.usersLiked.indexOf(req.body.userId);
         sauce.usersLiked.splice(index, 1); // On retire l'userId du tableau usersLikes
@@ -108,8 +109,10 @@ exports.checkScore = (req, res, next) => {
         sauce.dislikes--;
       }
       sauce.save();
-      console.log(sauce);
       res.status(200).json(sauce);
+      break;
     }
+    console.log(sauce) // à enlever
   })
 }
+
