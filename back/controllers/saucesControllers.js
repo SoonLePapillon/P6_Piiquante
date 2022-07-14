@@ -68,8 +68,12 @@ exports.getAllSauces = (req, res, next) => {
   );
 };
 
+// faire idéalement des async await et des switch à la place des IF
+
 exports.checkScore = (req, res, next) => {
-  Sauce.findOne({_id: req.params.id}).then((sauce) => { 
+  Sauce.findOne({_id: req.params.id})
+  .catch() // meilleur de le mettre en first quand le .then est trop big
+  .then((sauce) => { 
     if (req.body.like === 1) { // Si on appuie sur le pouce vert
       if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
         res.status(409).json({error : "Sauce already liked/disliked"}) // rajouter une str pour l'erreur
@@ -77,7 +81,7 @@ exports.checkScore = (req, res, next) => {
         sauce.likes++ // Ajoute 1 au nombre de likes 
         sauce.usersLiked.push(req.body.userId); // Ajoute l'userId dans le tableau usersLiked
         sauce.save();
-        console.log(sauce);
+        console.log(sauce); // enlever les logs de debug
         res.status(200).json(sauce);
       }
     }
