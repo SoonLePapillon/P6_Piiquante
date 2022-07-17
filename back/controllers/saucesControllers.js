@@ -3,11 +3,11 @@ const User = require('../models/usersModels.js');
 const fs = require("fs");
 
 exports.createSauce = (req, res, next) => {
-  const sauceObject = JSON.parse(req.body.sauce); // on extrait l'objet JSON de sauce
+  const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
   const sauce = new Sauce({
     ...sauceObject,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` // req.protocole c'est soit http soit https. Ensuite on a le nom d'hôte pour le nom de l'image
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` // req.protocole pour http(s)
   });
   sauce.save()
     .then(() => res.status(201).json({ message: 'Sauce enregistrée !'}))
@@ -15,8 +15,7 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.getOneSauce = (req, res, next) => {
-  Sauce.findOne({_id: req.params.id}).then((sauce) => { // on veut que l'id de l'objet en vente soit le même que l'id en paramètre de la requête (en gros)
-    res.status(200).json(sauce);
+  Sauce.findOne({_id: req.params.id}).then((sauce) => {
     })
   .catch((error) => {
       res.status(404).json({
@@ -77,12 +76,12 @@ exports.checkScore = (req, res, next) => {
   })
   .then((sauce) => { 
     switch (req.body.like) {
-    case 1 : // req.body.like renvoie 1 : pouce vert
+    case 1 : // pouce vert
       if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) { // pour empêcher de faire la requête depuis Insomnia
         res.status(409).json({error : "Sauce already liked/disliked"})
       } else {
-        sauce.likes++ // Ajoute 1 au nombre de likes 
-        sauce.usersLiked.push(req.body.userId); // Ajoute l'userId dans le tableau usersLiked
+        sauce.likes++
+        sauce.usersLiked.push(req.body.userId);
         sauce.save();
         res.status(200).json(sauce);
       }
@@ -100,8 +99,8 @@ exports.checkScore = (req, res, next) => {
     case 0 : // Si on rappuie sur un pouce sur lequel on avait déjà appuyé
       if (sauce.usersLiked.includes(req.body.userId)) {
         index = sauce.usersLiked.indexOf(req.body.userId);
-        sauce.usersLiked.splice(index, 1); // On retire l'userId du tableau usersLikes
-        sauce.likes--; // On retire le like
+        sauce.usersLiked.splice(index, 1);
+        sauce.likes--;
       }
       if (sauce.usersDisliked.includes(req.body.userId)) {
         index = sauce.usersDisliked.indexOf(req.body.userId);
@@ -112,7 +111,7 @@ exports.checkScore = (req, res, next) => {
       res.status(200).json(sauce);
       break;
     }
-    console.log(sauce) // à enlever
+    // console.log(sauce)
   })
 }
 

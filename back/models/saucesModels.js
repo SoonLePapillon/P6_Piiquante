@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const sauceSchema = mongoose.Schema({ // fonction schema mise à dispostion par le package mongoose
+const sauceSchema = mongoose.Schema({
   userId: {type: String, required:true},
   name: { type: String, required: true },
   manufacturer: { type: String, required: true },

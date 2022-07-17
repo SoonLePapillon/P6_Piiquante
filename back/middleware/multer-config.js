@@ -6,12 +6,12 @@ const MIME_TYPES = {
   'image/png': 'png'
 };
 
-const storage = multer.diskStorage({ // la méthode dickStorage() configure le chemin et le nom de fichier pour les fichiers entrants
+const storage = multer.diskStorage({
   destination: (req, file, callback) => { // destination : dans quel dossier enregistrer l'image
-    callback(null, 'images'); // null = pas d'erreur
+    callback(null, 'images'); 
   },
   filename: (req, file, callback) => {
-    const name = file.originalname.split(' ').join('_'); // on prend le nom de base du fichier et on remplace les espaces par des _ 
+    const name = file.originalname.split(' ').join('_');
     const extension = MIME_TYPES[file.mimetype];
     callback(null, name + Date.now() + '.' + extension);
   }
