@@ -4,9 +4,12 @@ const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require('path');
-
 const saucesRoutes = require("./routes/saucesRoutes.js");
 const usersRoutes = require("./routes/usersRoutes.js");
+const helmet = require('helmet');
+app.use(helmet({
+  crossOriginResourcePolicy : false
+}));
 
 mongoose.connect
   (process.env.DB_ACCESS, 
@@ -17,6 +20,7 @@ mongoose.connect
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 app.use(express.json());
+
 
 ///// Pour permettre des requêtes cross-origin (et empêcher des erreurs CORS), des headers spécifiques de contrôle d'accès doivent être précisés pour tous vos objets de réponse. ////
 app.use((req, res, next) => { //middleware général sera appliqué à toutes les routes
