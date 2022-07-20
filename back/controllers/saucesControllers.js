@@ -11,19 +11,23 @@ exports.createSauce = (req, res, next) => {
   });
   sauce.save()
     .then(() => res.status(201).json({ message: 'Sauce enregistrée !'}))
-    .catch(error => res.status(400).json({ error }));
+    .catch((error) => {
+      res.status(error.statusCode).json({
+        message : "Il y a eu une erreur lors de la création de votre sauce."
+      });
+    });
 };
 
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then((sauce) => {
      res.status(200).json(sauce);
     })
-  .catch((error) => {
-      res.status(404).json({
-        error: error
-      });
-    }
-  );
+    .catch((error) => {
+      console.log(error)
+      res.status(error.statusCode).json({
+        message : "Sauce introuvable."
+      })
+    });
 };
 
 exports.modifySauce = (req, res, next) => {
@@ -34,7 +38,11 @@ exports.modifySauce = (req, res, next) => {
     } : { ...req.body };
   Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
     .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
-    .catch(error => res.status(400).json({ error }));
+    .catch((error) => {
+      res.status(error.statusCode).json({
+        message : "Il y a eu une erreur lors de la modification de votre sauce."
+      });
+    });
 };
 
 exports.deleteSauce = (req, res, next) => {;
@@ -47,13 +55,18 @@ exports.deleteSauce = (req, res, next) => {;
     fs.unlink(`images/${filename}`, () => {
       Sauce.deleteOne({ _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Sauce supprimée !'}))
-        .catch(error => res.status(400).json({ error }));
+        .catch((error) => {
+          res.status(error.statusCode).json({
+            message : "Il y a eu une erreur lors de la suppression de votre sauce."
+          });
+        });
     });
   })
-  .catch(error => {
-    console.log(error);
-    res.status(500).json({message: 'une erreur est survenue'});
-  })
+  .catch((error) => {
+    res.status(error.statusCode).json({
+      message : "Une erreur est survenue."
+    });
+  });
 };
 
 exports.getAllSauces = (req, res, next) => {
@@ -61,25 +74,24 @@ exports.getAllSauces = (req, res, next) => {
       res.status(200).json(sauces);
     })
     .catch((error) => {
-      res.status(400).json({
-        error: error
+      res.status(error.statusCode).json({
+        message : "Une erreur est survenue."
       });
-    }
-  );
+    });
 };
 
 exports.checkScore = (req, res, next) => {
   Sauce.findOne({_id: req.params.id})
   .catch((error) => {
-    res.status(404).json({
-      error: error
-    })
+    res.status(error.statusCode).json({
+      message : "Une erreur est survenue."
+    });
   })
   .then((sauce) => { 
     switch (req.body.like) {
     case 1 : // pouce vert
       if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) { // pour empêcher de faire la requête depuis Insomnia
-        res.status(409).json({error : "Sauce already liked/disliked"})
+        res.status(409).json({message : "Vous avez déjà laissé un avis sur cette sauce."})
       } else {
         sauce.likes++
         sauce.usersLiked.push(req.body.userId);
@@ -89,7 +101,7 @@ exports.checkScore = (req, res, next) => {
       break;
     case -1 : // pouce rouge
       if (sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)) {
-        res.status(409).json({error : "Sauce already liked/disliked"})
+        res.status(409).json({message : "Vous avez déjà laissé un avis sur cette sauce."})
       } else {
         sauce.dislikes++
         sauce.usersDisliked.push(req.body.userId);
@@ -112,7 +124,6 @@ exports.checkScore = (req, res, next) => {
       res.status(200).json(sauce);
       break;
     }
-    // console.log(sauce)
   })
 }
 

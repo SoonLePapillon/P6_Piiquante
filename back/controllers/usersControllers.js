@@ -11,9 +11,17 @@ exports.signup = (req, res, next) => {
         });
         user.save()
           .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
-          .catch(error => res.status(400).json({ error }));
+          .catch((error) => {
+            res.status(error.statusCode).json({
+              message : "Une erreur est survenue lors de la création de votre compte."
+            });
+          });
       })
-      .catch(error => res.status(500).json({ error })); 
+      .catch((error) => {
+        res.status(error.statusCode).json({
+          message : "Une erreur est survenue."
+        });
+      });
 };
 
 exports.login = (req, res, next) => {
@@ -36,7 +44,15 @@ exports.login = (req, res, next) => {
               )
             });
           })
-          .catch(error => res.status(500).json({ error }));
+          .catch((error) => {
+            res.status(error.statusCode).json({
+              message : "Une erreur est survenue."
+            });
+          });
       })
-      .catch(error => res.status(500).json({ error })); // S'il y a un problème de connexion, un pb lié à Mongodb par exemple
+      .catch((error) => {
+        res.status(error.statusCode).json({
+          message : "Une erreur est survenue."
+        });
+      });
 };
